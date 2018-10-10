@@ -221,6 +221,7 @@ int main(void)
 	GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
 	// Unbind everything
+	GLCall(glBindVertexArray(0));
 	GLCall(glUseProgram(0));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
@@ -238,10 +239,8 @@ int main(void)
 		GLCall(glUseProgram(shader));
 		GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-		// Bind the Buffers & Enable the vertex attribute & set the layout of the buffer
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+		// Bind the vertex attribute object
+		GLCall(glBindVertexArray(vao));
 
 		// Bind the index buffer
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));

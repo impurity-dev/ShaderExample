@@ -8,6 +8,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 // Enum to differentiate which Shader we have
 struct ShaderProgramSource
@@ -167,15 +168,11 @@ int main(void)
 		GLCall(glGenVertexArrays(1, &vao));
 		GLCall(glBindVertexArray(vao));
 
-		// Create a VertextBuffer
+		VertexArray va;
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-
-		// Enable the vertex attribute
-		GLCall(glEnableVertexAttribArray(0));
-		// Define the structure of our buffer input
-		// First attribute, 2 components define this attribute, they are floats, not normalized, 2 float values define the size, next attribute offset
-		// This call will link index 0 of this vertex array will be bound to the currently bound array buffer (i.e. buffer^)
-		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+		va.AddBuffer(vb, layout);
 
 		// Create an IndexBuffer
 		IndexBuffer ib(indices, 6);
@@ -213,10 +210,8 @@ int main(void)
 			GLCall(glUseProgram(shader));
 			GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-			// Bind the vertex attribute object
-			GLCall(glBindVertexArray(vao));
-
-			// Bind the index buffer
+			// Bind the index buffer & vertex array
+			va.Bind();
 			ib.Bind();
 
 			// Draw our buffer

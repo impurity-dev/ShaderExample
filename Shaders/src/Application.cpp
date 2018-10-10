@@ -150,6 +150,9 @@ int main(void)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
+	// Sync this window with our monitors refresh rate
+	glfwSwapInterval(1);
+
 	/* Initialize GLEW */
 	if (glewInit() != GLEW_OK) 
 	{
@@ -221,6 +224,7 @@ int main(void)
 		// Draw our buffer
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+		// Animate Red Channel
 		if (r > 1.0f) increment = -0.05f;
 		else if (r < 0.0f) increment = 0.05f;
 		r += increment;

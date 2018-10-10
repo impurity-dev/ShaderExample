@@ -196,6 +196,7 @@ int main(void)
 	GLCall(glEnableVertexAttribArray(0));
 	// Define the structure of our buffer input
 	// First attribute, 2 components define this attribute, they are floats, not normalized, 2 float values define the size, next attribute offset
+	// This call will link index 0 of this vertex array will be bound to the currently bound array buffer (i.e. buffer^)
 	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
 	// Send the indices to the GPU

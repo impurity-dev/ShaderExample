@@ -138,6 +138,11 @@ int main(void)
 	if (!glfwInit())
 		return -1;
 
+	// Create the context with the core profile
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 	if (!window)
@@ -174,13 +179,18 @@ int main(void)
 		2, 3, 0, // triangle 2
 	};
 
+	// In the core , we need a vertex array object
+	unsigned int vao;
+	GLCall(glGenVertexArrays(1, &vao));
+	GLCall(glBindVertexArray(vao));
+
 	// Send the vertices to the GPU
 	// 1 buffer
 	// give pointer to unsigned int
 	unsigned int buffer;
 	GLCall(glGenBuffers(1, &buffer));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
 	// Enable the vertex attribute
 	GLCall(glEnableVertexAttribArray(0));
@@ -210,6 +220,11 @@ int main(void)
 	// Pass our data to the shader uniform
 	GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
+	// Unbind everything
+	GLCall(glUseProgram(0));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
 	float r = 0.0f;
 	float increment = 0.05f;
 
@@ -219,8 +234,18 @@ int main(void)
 		/* Render here */
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-		// Pass our data to the shader uniform
+		// Bind the shader program & Pass our data to the shader uniform
+		GLCall(glUseProgram(shader));
 		GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+
+		// Bind the Buffers & Enable the vertex attribute & set the layout of the buffer
+		GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+		GLCall(glEnableVertexAttribArray(0));
+		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+
+		// Bind the index buffer
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+
 		// Draw our buffer
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 

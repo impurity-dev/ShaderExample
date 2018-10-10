@@ -13,11 +13,13 @@
 	x;\
 	ASSERT(GLLogCall(#x, __FILE__, __LINE__));
 
+// Clear all existing errors
 static void GLClearError()
 {
 	while (glGetError() != GL_NO_ERROR);
 }
 
+// Log if there is an error in OpenGL
 static bool GLLogCall(const char* function, const char* file, int line)
 {
 	while (GLenum error = glGetError())
@@ -28,12 +30,14 @@ static bool GLLogCall(const char* function, const char* file, int line)
 	return true;
 }
 
+// Enum to differentiate which Shader we have
 struct ShaderProgramSource
 {
 	std::string VertexSource;
 	std::string FragmentSource;
 };
 
+// Attempt to read the shader file and parse the data
 static ShaderProgramSource ParseShader(const std::string& filepath)
 {
 	std::ifstream stream(filepath);
@@ -64,10 +68,11 @@ static ShaderProgramSource ParseShader(const std::string& filepath)
 	return { ss[0].str(), ss[1].str() };
 }
 
+// Tries to take our Shader and compile it into openGL
 static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
 	// Create the shader program
-	unsigned int id = glCreateShader(type);
+	GLCall(unsigned int id = glCreateShader(type));
 	// Get the source
 	const char* src = source.c_str();
 	// Specify the source of the shader, how many source codes are we specifying, pnter of source, length;
@@ -100,7 +105,7 @@ static unsigned int CompileShader(unsigned int type, const std::string& source)
 static int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
 	// Create the shader program
-	unsigned int program = glCreateProgram();
+	GLCall(unsigned int program = glCreateProgram());
 	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
 	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
@@ -124,7 +129,7 @@ static int CreateShader(const std::string& vertexShader, const std::string& frag
 // core - do not use any depricated functions
 // layout(location = 0) is the index of the attribute
 
-
+// Run our application
 int main(void)
 {
 	GLFWwindow* window;
@@ -188,12 +193,19 @@ int main(void)
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(float), indices, GL_STATIC_DRAW));
 
-
+	// Shader source loaded from our res dir
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
 	// Compile our shaders together
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+	// Bind our shader
 	GLCall(glUseProgram(shader));
+
+	// Retrieve the uniforms ID
+	GLCall(int location = glGetUniformLocation(shader, "u_Color"));
+	ASSERT(location != -1);
+	// Pass our data to the shader uniform
+	GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
